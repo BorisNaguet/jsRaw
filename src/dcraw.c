@@ -23,6 +23,8 @@
    $Date: 2015/05/25 02:29:14 $
  */
 
+#define NODEPS
+
 #define DCRAW_VERSION "9.26"
 
 #ifndef _GNU_SOURCE
