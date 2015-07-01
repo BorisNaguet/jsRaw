@@ -1,6 +1,8 @@
 # jsRaw
 Port of famous dcraw image processing to Javascript via emscripten &amp; asm.js
 
+The goal is to be able to process any [Raw image](https://en.wikipedia.org/wiki/Raw_image_format) within a browser simple page locally (i.e. without network).
+
 You can test the last version live here:
 http://borisnaguet.github.io/jsRaw/jsRaw.html
 
