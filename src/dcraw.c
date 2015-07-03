@@ -24,6 +24,8 @@
  */
 
 #define NODEPS
+#include <dirent.h>
+
 
 #define DCRAW_VERSION "9.26"
 
@@ -9721,6 +9723,19 @@ void CLASS write_ppm_tiff()
   free (ppm);
 }
 
+void listDir() {
+	DIR *dp;
+	struct dirent *ep;
+
+	dp = opendir("./");
+	if (dp != NULL) {
+		while (ep = readdir(dp))
+			puts(ep->d_name);
+		(void) closedir(dp);
+	} else
+		perror("Couldn't open the directory");
+}
+
 int CLASS main (int argc, const char **argv)
 {
   int arg, status=0, quality, i, c;
@@ -9743,6 +9758,8 @@ int CLASS main (int argc, const char **argv)
   bindtextdomain ("dcraw", LOCALEDIR);
   textdomain ("dcraw");
 #endif
+
+  listDir();
 
   if (argc == 1) {
     printf(_("\nRaw photo decoder \"dcraw\" v%s"), DCRAW_VERSION);
@@ -10132,6 +10149,7 @@ thumbnail:
     fclose(ifp);
     if (ofp != stdout) fclose(ofp);
 cleanup:
+	listDir();
     if (meta_data) free (meta_data);
     if (ofname) free (ofname);
     if (oprof) free (oprof);
