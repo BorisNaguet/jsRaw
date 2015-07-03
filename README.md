@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/BorisNaguet/jsRaw.svg?branch=master)](https://travis-ci.org/BorisNaguet/jsRaw)
+
 # jsRaw
 Port of famous dcraw image processing to Javascript via emscripten &amp; asm.js
 
