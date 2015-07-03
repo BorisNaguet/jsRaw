@@ -9,7 +9,7 @@ mkdir out/files
 
 #copy html content
 cp ./html/* ./out/html/
-cp ./files/* .out/files/
+cp ./files/* ./out/files/
 
 # go to the out directory and create a *new* Git repo
 cd out
