@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Emscripten-Generated Code</title>
+    <style>
+		@import "style.css";
+    </style>
+  </head>
+  <body>
+   
+    <div class="spinner" id='spinner'></div>
+    <div class="emscripten" id="status">Downloading...</div>
+
+<span id='controls'>
+  <span><input type="checkbox" id="resize">Resize canvas</span>
+  <span><input type="checkbox" id="pointerLock" checked>Lock/hide mouse pointer &nbsp;&nbsp;&nbsp;</span>
+  <span><input type="button" value="Fullscreen" onclick="Module.requestFullScreen(document.getElementById('pointerLock').checked, document.getElementById('resize').checked)">
+  </span>
+</span>
+
+    <div class="emscripten">
+      <progress value="0" max="100" id="progress" hidden=1></progress>
+    </div>
+
+    
+    <div class="emscripten_border">
+      <canvas class="emscripten" id="canvas" oncontextmenu="event.preventDefault()"></canvas>
+    </div>
+    <textarea id="output" rows="8"></textarea>
+
+    
+    <script type='text/javascript'>
+    var statusElement = document.getElementById('status');
+    var progressElement = document.getElementById('progress');
+    var spinnerElement = document.getElementById('spinner');
+    
+    function beforePrint() {
+    	//var element = document.getElementById('output');
+	    //if (element) element.value = ''; // clear browser cache
+    }
+    
+    function print(text) {
+    	var element = document.getElementById('output');
+    	if (arguments.length > 1) text = Array.prototype.slice.call(arguments).join(' ');
+	      // These replacements are necessary if you render to raw HTML
+	      //text = text.replace(/&/g, "&amp;");
+	      //text = text.replace(/</g, "&lt;");
+	      //text = text.replace(/>/g, "&gt;");
+	      //text = text.replace('\n', '<br>', 'g');
+	      console.log(text);
+	      if (element) {
+	        element.value += text + "\n";
+	        element.scrollTop = element.scrollHeight; // focus on bottom
+	      }
+    }
+	    
+    function printErr(text) {
+    	if (arguments.length > 1) text = Array.prototype.slice.call(arguments).join(' ');
+	    if (0) { // XXX disabled for safety typeof dump == 'function') {
+	      dump(text + '\n'); // fast, straight to the real console
+	    } else {
+	      console.error(text);
+	    }
+    }
+	
+	function canvas() {
+		var canvas = document.getElementById('canvas');
+		
+	    // As a default initial behavior, pop up an alert when webgl context is lost. To make your
+	    // application robust, you may want to override this behavior before shipping!
+	    // See http://www.khronos.org/registry/webgl/specs/latest/1.0/#5.15.2
+	    canvas.addEventListener("webglcontextlost", function(e) { alert('WebGL context lost. You will need to reload the page.'); e.preventDefault(); }, false);
+	
+	    return canvas;
+	}
+    
+	function setStatus(text) {
+		if (!setStatus.last) setStatus.last = { time: Date.now(), text: '' };
+	    if (text === setStatus.text) return;
+	    var m = text.match(/([^(]+)\((\d+(\.\d+)?)\/(\d+)\)/);
+	    var now = Date.now();
+	    if (m && now - Date.now() < 30) return; // if this is a progress update, skip it if too soon
+	    if (m) {
+	      text = m[1];
+	      progressElement.value = parseInt(m[2])*100;
+	      progressElement.max = parseInt(m[4])*100;
+	      progressElement.hidden = false;
+	      spinnerElement.hidden = false;
+	    } else {
+	      progressElement.value = null;
+	      progressElement.max = null;
+	      progressElement.hidden = true;
+	      if (!text) spinnerElement.style.display = 'none';
+	    }
+	    statusElement.innerHTML = text;
+	}
+    
+    window.onerror = function(event) {
+      // TODO: do not warn on ok events like simulating an infinite loop or exitStatus
+      setStatus('Exception thrown, see JavaScript console');
+      spinnerElement.style.display = 'none';
+      setStatus = function(text) {
+        if (text) printErr('[post-exception status] ' + text);
+      };
+    };
+    
+    </script>
+
+		<div>
+			<label for="theUri">File:</label> 
+			<select id="theUri" >
+				<option value="../files/RAW_CANON_D30_SRGB.CRW">Canon D30(*)</option>
+    			<option value="../files/RAW_NIKON_D1.NEF">Nikon D1(*)</option>
+    		</select>
+    	</div>
+    	<div>
+    		<input type="button" onclick="launch()" value="Process" ></input>
+    	</div>
+    <script type='text/javascript'>
+		uri = '';
+		
+		function launch(){
+    		var uri = document.querySelector('#theUri').value;
+    		
+			var myWorker = new Worker("jsRaw.js");
+			myWorker.onmessage = function(e) {
+				
+				switch (e.data[0]) {
+				case "printErr": printErr(e.data[1]);break;
+				case "beforePrint": beforePrint();break;
+				case "print": print(e.data[1]); break;
+				case "canvas": canvas(); break;
+				case "setStatus": setStatus(e.data[1]); break;
+				default: console.log("main Thread: " + e + " == "+ e.data);
+				}
+			};
+		
+			myWorker.onerror = function(e) {
+				console.log("ON ERROR: " + lineno + " - " + filename + " - " + message)
+			}
+			console.log("about to launch");
+			myWorker.postMessage([uri]);
+    	}
+    </script>
+  </body>
+</html>
