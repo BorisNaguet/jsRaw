@@ -4,9 +4,12 @@ set -e # exit with nonzero exit code if anything fails
 # clear and re-create the out directory
 rm -rf out || exit 0;
 mkdir out;
+mkdir out/html
+mkdir out/files
 
 #copy html content
-cp ./html/* ./out/
+cp ./html/* ./out/html/
+cp ./files/* .out/files/
 
 # go to the out directory and create a *new* Git repo
 cd out
